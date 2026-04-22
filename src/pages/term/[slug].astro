@@ -1,0 +1,130 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const terms = await getCollection('terms');
+  return terms.map((term) => ({
+    params: { slug: term.data.slug },
+    props: { term },
+  }));
+}
+
+const { term } = Astro.props;
+
+// Resolve category references to their display data.
+const categoryEntries = await Promise.all(
+  term.data.categories.map((ref) => getEntry(ref))
+);
+const categories = categoryEntries.filter((c): c is NonNullable<typeof c> => !!c);
+
+// Resolve related term references.
+const relatedEntries = term.data.relatedTerms
+  ? await Promise.all(
+      term.data.relatedTerms.map((ref) => getEntry(ref))
+    )
+  : [];
+const related = relatedEntries.filter((t): t is NonNullable<typeof t> => !!t);
+
+const dateString = term.data.lastUpdated.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+<BaseLayout
+  title={term.data.name}
+  description={term.data.plainEnglish}
+>
+  <p class="muted" style="margin-bottom: 0.25rem;">
+    <a href="/">Home</a> / <a href="/a-z">A–Z</a>
+  </p>
+  <h1>{term.data.name}</h1>
+
+  <div class="term-meta">
+    Categories:{' '}
+    {categories.map((cat, i) => (
+      <>
+        <a href={`/category/${cat.data.slug}`}>{cat.data.name}</a>
+        {i < categories.length - 1 ? ', ' : ''}
+      </>
+    ))}
+    {' '}· Last updated {dateString}
+  </div>
+
+  <section class="section-block">
+    <h2>Plain English</h2>
+    <p>{term.data.plainEnglish}</p>
+  </section>
+
+  <section class="section-block">
+    <h2>Detailed Explanation</h2>
+    <p style="white-space: pre-wrap;">{term.data.detailedExplanation}</p>
+  </section>
+
+  {term.data.workedExample && (
+    <section class="section-block">
+      <h2>Worked Example</h2>
+      <p style="white-space: pre-wrap;">{term.data.workedExample}</p>
+    </section>
+  )}
+
+  {term.data.usedInSentence && (
+    <section class="section-block">
+      <h2>Used in a Sentence</h2>
+      <p class="quote">{term.data.usedInSentence}</p>
+    </section>
+  )}
+
+  {term.data.whenItApplies && (
+    <section class="section-block">
+      <h2>When It Applies</h2>
+      <p>{term.data.whenItApplies}</p>
+    </section>
+  )}
+
+  {term.data.commonMistakes && (
+    <section class="section-block">
+      <h2>Common Mistakes</h2>
+      <p style="white-space: pre-wrap;">{term.data.commonMistakes}</p>
+    </section>
+  )}
+
+  {term.data.howToRemember && (
+    <section class="section-block">
+      <h2>How to Remember It</h2>
+      <p>{term.data.howToRemember}</p>
+    </section>
+  )}
+
+  {term.data.whenToConsult && (
+    <section class="section-block">
+      <h2>When to Talk to a Professional</h2>
+      <p>{term.data.whenToConsult}</p>
+    </section>
+  )}
+
+  {term.data.faqs && term.data.faqs.length > 0 && (
+    <section class="section-block">
+      <h2>FAQs</h2>
+      {term.data.faqs.map((faq) => (
+        <div class="faq-item">
+          <p class="q">{faq.question}</p>
+          <p class="a">{faq.answer}</p>
+        </div>
+      ))}
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="section-block">
+      <h2>Related Terms</h2>
+      <ul class="related">
+        {related.map((r) => (
+          <li><a href={`/term/${r.data.slug}`}>{r.data.name}</a></li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+</BaseLayout>

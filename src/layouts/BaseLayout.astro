@@ -1,0 +1,46 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  wide?: boolean;
+}
+
+const { title, description, wide = false } = Astro.props;
+const siteTitle = 'Personal Finance Glossary';
+const fullTitle = title === siteTitle ? title : `${title} — ${siteTitle}`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{fullTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a href="/" class="site-logo">Personal Finance Glossary</a>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="/">Home</a>
+          <a href="/a-z">A–Z</a>
+          <a href="/about">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class={wide ? 'wide' : undefined}>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <p>Educational content only — not personal financial advice. &copy; {new Date().getFullYear()}</p>
+      </div>
+    </footer>
+  </body>
+</html>

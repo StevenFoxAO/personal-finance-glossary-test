@@ -1,0 +1,48 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const terms = (await getCollection('terms')).sort((a, b) =>
+  a.data.name.localeCompare(b.data.name)
+);
+
+const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const termsByLetter: Record<string, typeof terms> = {};
+for (const letter of alphabet) termsByLetter[letter] = [];
+for (const term of terms) {
+  const letter = term.data.name[0].toUpperCase();
+  if (termsByLetter[letter]) termsByLetter[letter].push(term);
+}
+
+const lettersWithTerms = new Set(
+  terms.map((t) => t.data.name[0].toUpperCase())
+);
+---
+<BaseLayout
+  title="A–Z Index"
+  description="All terms in the glossary, listed alphabetically."
+  wide
+>
+  <h1>A–Z Index</h1>
+
+  <nav class="az-strip" aria-label="Alphabetical jump">
+    {alphabet.map((letter) => (
+      lettersWithTerms.has(letter)
+        ? <a href={`#${letter}`}>{letter}</a>
+        : <span>{letter}</span>
+    ))}
+  </nav>
+
+  {alphabet.map((letter) => (
+    termsByLetter[letter].length > 0 && (
+      <section class="az-section" id={letter}>
+        <h2>{letter}</h2>
+        <div class="az-columns">
+          {termsByLetter[letter].map((term) => (
+            <a href={`/term/${term.data.slug}`}>{term.data.name}</a>
+          ))}
+        </div>
+      </section>
+    )
+  ))}
+</BaseLayout>

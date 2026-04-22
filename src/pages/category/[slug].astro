@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const categories = await getCollection('categories');
+  const terms = await getCollection('terms');
+
+  return categories.map((category) => {
+    const matching = terms
+      .filter((term) =>
+        term.data.categories.some((ref) => ref.id === category.id)
+      )
+      .sort((a, b) => a.data.name.localeCompare(b.data.name));
+    return {
+      params: { slug: category.data.slug },
+      props: { category, terms: matching },
+    };
+  });
+}
+
+const { category, terms } = Astro.props;
+---
+<BaseLayout
+  title={category.data.name}
+  description={category.data.description}
+>
+  <p class="muted" style="margin-bottom: 0.25rem;">
+    <a href="/">Home</a> / Category
+  </p>
+  <h1>{category.data.name}</h1>
+  <p>{category.data.description}</p>
+
+  <hr />
+
+  {terms.length === 0 ? (
+    <p class="muted">No terms yet in this category.</p>
+  ) : (
+    <ul class="related">
+      {terms.map((term) => (
+        <li>
+          <a href={`/term/${term.data.slug}`}>{term.data.name}</a>
+        </li>
+      ))}
+    </ul>
+  )}
+</BaseLayout>

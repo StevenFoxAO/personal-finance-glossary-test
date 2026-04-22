@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const categories = (await getCollection('categories')).sort(
+  (a, b) => (a.data.order ?? 999) - (b.data.order ?? 999)
+);
+
+const terms = await getCollection('terms');
+
+// Deterministic "Term of the Day" based on the date so it changes daily
+// without being random across refreshes within a day.
+const dayIndex = Math.floor(Date.now() / 86_400_000) % terms.length;
+const termOfTheDay = terms[dayIndex];
+
+const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const lettersWithTerms = new Set(
+  terms.map((t) => t.data.name[0].toUpperCase())
+);
+---
+<BaseLayout
+  title="Personal Finance Glossary"
+  description="Plain-English definitions for personal finance terms, written for real people."
+  wide
+>
+  <h1>Personal Finance Glossary</h1>
+
+  <section class="section-block">
+    <p>
+      Personal finance is full of jargon that gets in the way of good decisions.
+      This glossary translates the language — in plain English, with real examples,
+      and with notes on when to talk to a professional. <em>[Placeholder: replace with
+      a sharper "why this exists" paragraph before launch.]</em>
+    </p>
+  </section>
+
+  <section class="section-block">
+    <h2>Browse by category</h2>
+    <div class="grid">
+      {categories.map((cat) => (
+        <div class="card">
+          <h3><a href={`/category/${cat.data.slug}`}>{cat.data.name}</a></h3>
+          <p>{cat.data.description}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {termOfTheDay && (
+    <section class="callout">
+      <h2>Term of the day</h2>
+      <h3 style="margin: 0.25rem 0 0.4rem;">
+        <a href={`/term/${termOfTheDay.data.slug}`}>{termOfTheDay.data.name}</a>
+      </h3>
+      <p style="margin: 0;">{termOfTheDay.data.plainEnglish}</p>
+    </section>
+  )}
+
+  <section class="section-block">
+    <h2>Jump to a letter</h2>
+    <nav class="az-strip" aria-label="Alphabetical index">
+      {alphabet.map((letter) => (
+        lettersWithTerms.has(letter)
+          ? <a href={`/a-z#${letter}`}>{letter}</a>
+          : <span>{letter}</span>
+      ))}
+    </nav>
+  </section>
+
+  <section class="callout">
+    <h2>Newsletter</h2>
+    <p style="margin: 0 0 0.5rem;">One new term in your inbox each week. No fluff.</p>
+    <p class="muted" style="margin: 0; font-size: 0.9rem;">
+      [Placeholder: signup form goes here once we pick a provider.]
+    </p>
+  </section>
+</BaseLayout>
