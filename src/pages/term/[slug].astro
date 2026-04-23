@@ -1,6 +1,10 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
+import { marked } from 'marked';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+marked.setOptions({ gfm: true, breaks: false });
+const md = (s: string | undefined): string => (s ? (marked.parse(s) as string) : '');
 
 export async function getStaticPaths() {
   const terms = await getCollection('terms');
@@ -51,18 +55,18 @@ const dateString = term.data.lastUpdated.toLocaleDateString('en-US', {
 
   <section class="section-block">
     <h2>Plain English</h2>
-    <p>{term.data.plainEnglish}</p>
+    <Fragment set:html={md(term.data.plainEnglish)} />
   </section>
 
   <section class="section-block">
     <h2>Detailed Explanation</h2>
-    <p style="white-space: pre-wrap;">{term.data.detailedExplanation}</p>
+    <Fragment set:html={md(term.data.detailedExplanation)} />
   </section>
 
   {term.data.workedExample && (
     <section class="section-block">
       <h2>Worked Example</h2>
-      <p style="white-space: pre-wrap;">{term.data.workedExample}</p>
+      <Fragment set:html={md(term.data.workedExample)} />
     </section>
   )}
 
@@ -76,28 +80,28 @@ const dateString = term.data.lastUpdated.toLocaleDateString('en-US', {
   {term.data.whenItApplies && (
     <section class="section-block">
       <h2>When It Applies</h2>
-      <p>{term.data.whenItApplies}</p>
+      <Fragment set:html={md(term.data.whenItApplies)} />
     </section>
   )}
 
   {term.data.commonMistakes && (
     <section class="section-block">
       <h2>Common Mistakes</h2>
-      <p style="white-space: pre-wrap;">{term.data.commonMistakes}</p>
+      <Fragment set:html={md(term.data.commonMistakes)} />
     </section>
   )}
 
   {term.data.howToRemember && (
     <section class="section-block">
       <h2>How to Remember It</h2>
-      <p>{term.data.howToRemember}</p>
+      <Fragment set:html={md(term.data.howToRemember)} />
     </section>
   )}
 
   {term.data.whenToConsult && (
     <section class="section-block">
       <h2>When to Talk to a Professional</h2>
-      <p>{term.data.whenToConsult}</p>
+      <Fragment set:html={md(term.data.whenToConsult)} />
     </section>
   )}
 
@@ -107,7 +111,7 @@ const dateString = term.data.lastUpdated.toLocaleDateString('en-US', {
       {term.data.faqs.map((faq) => (
         <div class="faq-item">
           <p class="q">{faq.question}</p>
-          <p class="a">{faq.answer}</p>
+          <Fragment set:html={md(faq.answer)} />
         </div>
       ))}
     </section>
