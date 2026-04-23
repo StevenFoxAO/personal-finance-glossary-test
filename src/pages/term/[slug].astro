@@ -43,11 +43,8 @@ const dateString = term.data.lastUpdated.toLocaleDateString('en-US', {
 
   <div class="term-meta">
     Categories:{' '}
-    {categories.map((cat, i) => (
-      <>
-        <a href={`/category/${cat.data.slug}`}>{cat.data.name}</a>
-        {i < categories.length - 1 ? ', ' : ''}
-      </>
+    {categories.map((cat) => (
+      <a href={`/category/${cat.data.slug}`} class="category-pill">{cat.data.name}</a>
     ))}
     {' '}· Last updated {dateString}
   </div>

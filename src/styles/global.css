@@ -168,6 +168,22 @@ main.wide { max-width: var(--max-width-wide); }
 }
 .term-meta a { color: var(--color-link); }
 
+.term-meta a.category-pill {
+  display: inline-block;
+  background: #ececec;
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  margin-right: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--color-text);
+  text-decoration: none;
+  line-height: 1.6;
+}
+.term-meta a.category-pill:hover {
+  background: #dedede;
+  text-decoration: none;
+}
+
 .section-block { margin-bottom: 1.8rem; }
 .section-block h2 {
   font-size: 1.1rem;
